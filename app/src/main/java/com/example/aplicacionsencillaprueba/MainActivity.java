@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         contactRV = findViewById(R.id.rv);
         FloatingActionButton addButton = findViewById(R.id.addButton);
 
-        ArrayList<Adapter.Contacts> contactsList;
+        ArrayList<Adapter.Contacts> contactsList = new ArrayList<>();
         adapter = new Adapter(this, contactsList);
         contactRV.setLayoutManager(new LinearLayoutManager(this));
         contactRV.setAdapter(adapter);
