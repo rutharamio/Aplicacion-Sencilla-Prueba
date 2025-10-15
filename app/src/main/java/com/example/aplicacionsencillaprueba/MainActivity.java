@@ -19,12 +19,24 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import android.content.Intent;
+
 
 public class MainActivity extends AppCompatActivity {
 
     private ArrayList<Contacts> contactsArrayList = new ArrayList<>();
     private RecyclerView contactRV;
     private Adapter adapter;
+    private final ActivityResultLauncher<Intent> createContactLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    contactsArrayList.clear();
+                    getContacts();   // refresca lista después de crear un contacto
+                }
+            });
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +45,12 @@ public class MainActivity extends AppCompatActivity {
 
         contactRV = findViewById(R.id.rv);
         FloatingActionButton addButton = findViewById(R.id.addButton);
+        addButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, CreateNewContactActivity.class);
+            createContactLauncher.launch(intent);
+        });
+
+
 
         adapter = new Adapter(this, contactsArrayList);
         contactRV.setLayoutManager(new LinearLayoutManager(this));
@@ -66,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getContacts() {
+        contactsArrayList.clear();
         Cursor cursor = getContentResolver().query(
                 ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                 null, null, null, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
