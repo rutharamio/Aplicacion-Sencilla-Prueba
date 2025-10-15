@@ -35,12 +35,12 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         Contacts contact = contactsArrayList.get(position);
         holder.contactTV.setText(contact.getUserName());
 
-        // Click listener comentado hasta que Sofía haga su parte
+        // Click listener comentado hasta que Sofía haga su parte yasta
         holder.itemView.setOnClickListener(v -> {
-            // Intent intent = new Intent(context, ContactDetailActivity.class);
-            // intent.putExtra("name", contact.getUserName());
-            // intent.putExtra("contact", contact.getContactNumber());
-            // context.startActivity(intent);
+             Intent intent = new Intent(context, ContactDetailActivity.class);
+             intent.putExtra("name", contact.getUserName());
+             intent.putExtra("contact", contact.getContactNumber());
+             context.startActivity(intent);
         });
     }
 
@@ -59,4 +59,41 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             contactTV = itemView.findViewById(android.R.id.text1);
         }
     }
+    public static class Contacts {
+        private String userName;
+        private String contactNumber;
+
+        public Contacts(String userName, String contactNumber) {
+            this.userName = userName;
+            this.contactNumber = contactNumber;
+        }
+
+        public String getUserName() {
+            return userName;
+        }
+
+        public String getContactNumber() {
+            return contactNumber;
+        }
+    }
+    public class ContactDetailActivity extends AppCompatActivity {
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setContentView(R.layout.activity_contact_detail);
+
+            TextView nameTV = findViewById(R.id.nameTV);
+            TextView numberTV = findViewById(R.id.numberTV);
+
+            // Obtener datos del Intent
+            String name = getIntent().getStringExtra("name");
+            String contact = getIntent().getStringExtra("contact");
+
+            // Mostrar datos
+            nameTV.setText(name);
+            numberTV.setText(contact);
+        }
+    }
+
+
 }
