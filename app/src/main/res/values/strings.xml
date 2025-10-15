@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Aplicacion Sencilla Prueba</string>
+    <string name="add_contact">Agregar contacto</string>
 </resources>
