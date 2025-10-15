@@ -4,9 +4,7 @@ plugins {
 
 android {
     namespace = "com.example.aplicacionsencillaprueba"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.aplicacionsencillaprueba"
@@ -41,4 +39,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    implementation("com.google.android.material:material:1.12.0")
+    implementation("com.karumi:dexter:6.2.3")
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation("androidx.appcompat:appcompat:1.7.0")
 }
