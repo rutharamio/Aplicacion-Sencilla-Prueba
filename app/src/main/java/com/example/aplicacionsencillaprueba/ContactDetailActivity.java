@@ -2,98 +2,79 @@ package com.example.aplicacionsencillaprueba;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import com.karumi.dexter.Dexter;
-import com.karumi.dexter.PermissionToken;
-import com.karumi.dexter.listener.PermissionDeniedResponse;
-import com.karumi.dexter.listener.PermissionGrantedResponse;
-import com.karumi.dexter.listener.single.PermissionListener;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 public class ContactDetailActivity extends AppCompatActivity {
-
-    private TextView nameTV, phoneTV;
-    private Button callBtn, smsBtn;
-    private String name, phone;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact_detail);
 
-        nameTV = findViewById(R.id.nameTV);
-        phoneTV = findViewById(R.id.phoneTV);
-        callBtn = findViewById(R.id.callBtn);
-        smsBtn = findViewById(R.id.smsBtn);
+        // Obtener las vistas de texto y botones
+        TextView nameTV = findViewById(R.id.nameTV);
+        TextView numberTV = findViewById(R.id.numberTV);
+        Button callButton = findViewById(R.id.callButton);
+        Button smsButton = findViewById(R.id.smsButton);
 
+        // Obtener datos del Intent
+        String name = getIntent().getStringExtra("name");
+        String contact = getIntent().getStringExtra("contact");
 
-        // Recibir datos del intent
-        name = getIntent().getStringExtra("name");
-        phone = getIntent().getStringExtra("contact");
-
-        if (name == null) name = "Sin nombre";
-        if (phone == null) phone = "";
-
+        // Mostrar los datos del contacto
         nameTV.setText(name);
-        phoneTV.setText(phone);
+        numberTV.setText(contact);
 
-        callBtn.setOnClickListener(v -> requestCallPermissionAndCall());
+        // Acción al hacer clic en "Llamar"
+        callButton.setOnClickListener(v -> {
+            String phone = numberTV.getText().toString();
 
-        smsBtn.setOnClickListener(v -> {
-            if (phone.isEmpty()) {
-                Toast.makeText(this, "Número no disponible", Toast.LENGTH_SHORT).show();
-                return;
+            // Verificar si se tiene el permiso para hacer llamadas
+            if (ContextCompat.checkSelfPermission(ContactDetailActivity.this, Manifest.permission.CALL_PHONE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                // Realizar la llamada
+                Intent callIntent = new Intent(Intent.ACTION_CALL);
+                callIntent.setData(Uri.parse("tel:" + phone));
+                startActivity(callIntent);
+            } else {
+                // Pedir permiso si no se tiene
+                ActivityCompat.requestPermissions(ContactDetailActivity.this,
+                        new String[]{Manifest.permission.CALL_PHONE}, 1);
             }
-            Intent i = new Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:" + phone));
-            i.putExtra("sms_body", "Hola " + name + "!");
-            startActivity(i);
+        });
+
+        // Acción al hacer clic en "Enviar SMS"
+        smsButton.setOnClickListener(v -> {
+            String phone = numberTV.getText().toString();
+            // Abrir la app de SMS con el número prellenado
+            Intent smsIntent = new Intent(Intent.ACTION_VIEW);
+            smsIntent.setData(Uri.parse("smsto:" + phone));
+            smsIntent.putExtra("sms_body", "Hola, te estoy enviando un mensaje desde mi app de contactos.");
+            startActivity(smsIntent);
         });
     }
 
-    private void requestCallPermissionAndCall() {
-        if (phone.isEmpty()) {
-            Toast.makeText(this, "Número no disponible", Toast.LENGTH_SHORT).show();
-            return;
+    // Callback para los permisos de llamada
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Si el permiso es concedido, realizar la llamada
+        if (requestCode == 1 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            String phone = getIntent().getStringExtra("contact");
+            Intent callIntent = new Intent(Intent.ACTION_CALL);
+            callIntent.setData(Uri.parse("tel:" + phone));
+            startActivity(callIntent);
+        } else {
+            Toast.makeText(this, "Permiso de llamada no concedido", Toast.LENGTH_SHORT).show();
         }
-
-        Dexter.withContext(this)
-                .withPermission(Manifest.permission.CALL_PHONE)
-                .withListener(new PermissionListener() {
-                    @Override
-                    public void onPermissionGranted(PermissionGrantedResponse response) {
-                        callNumber();
-                    }
-
-                    @Override
-                    public void onPermissionDenied(PermissionDeniedResponse response) {
-                        // fallback: abrir dialer si no dio permiso
-                        openDialer();
-                    }
-
-                    @Override
-                    public void onPermissionRationaleShouldBeShown(com.karumi.dexter.listener.PermissionRequest permission, PermissionToken token) {
-                        token.continuePermissionRequest();
-                    }
-                }).check();
-    }
-
-    private void callNumber() {
-        Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + phone));
-        try {
-            startActivity(intent);
-        } catch (SecurityException ex) {
-            // si por alguna razón falta permiso
-            openDialer();
-        }
-    }
-
-    private void openDialer() {
-        Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phone));
-        startActivity(intent);
     }
 }
-

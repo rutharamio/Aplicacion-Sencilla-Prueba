@@ -1,6 +1,7 @@
 package com.example.aplicacionsencillaprueba;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,8 +25,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Usa un layout simple de Android hasta que tengas tu XML personalizado
-        View view = LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_1, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.contacts_rv_item, parent, false);
         return new ViewHolder(view);
     }
 
@@ -33,9 +33,10 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Contacts contact = contactsArrayList.get(position);
-        holder.contactTV.setText(contact.getUserName());
+        holder.nameTV.setText(contact.getUserName());
+        holder.numberTV.setText(contact.getContactNumber());
 
-        // Click listener comentado hasta que Sofía haga su parte yasta
+        // Click listener comentado hasta que Sofía haga su parte
         holder.itemView.setOnClickListener(v -> {
              Intent intent = new Intent(context, ContactDetailActivity.class);
              intent.putExtra("name", contact.getUserName());
@@ -52,48 +53,13 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
     // ViewHolder class to hold and manage views for each RecyclerView item.
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView contactTV;
+        private final TextView nameTV;
+        private final TextView numberTV;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            contactTV = itemView.findViewById(android.R.id.text1);
+            nameTV = itemView.findViewById(R.id.tvName);
+            numberTV = itemView.findViewById(R.id.tvNumber);
         }
     }
-    public static class Contacts {
-        private String userName;
-        private String contactNumber;
-
-        public Contacts(String userName, String contactNumber) {
-            this.userName = userName;
-            this.contactNumber = contactNumber;
-        }
-
-        public String getUserName() {
-            return userName;
-        }
-
-        public String getContactNumber() {
-            return contactNumber;
-        }
-    }
-    public class ContactDetailActivity extends AppCompatActivity {
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            setContentView(R.layout.activity_contact_detail);
-
-            TextView nameTV = findViewById(R.id.nameTV);
-            TextView numberTV = findViewById(R.id.numberTV);
-
-            // Obtener datos del Intent
-            String name = getIntent().getStringExtra("name");
-            String contact = getIntent().getStringExtra("contact");
-
-            // Mostrar datos
-            nameTV.setText(name);
-            numberTV.setText(contact);
-        }
-    }
-
-
 }

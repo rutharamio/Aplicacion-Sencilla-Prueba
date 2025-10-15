@@ -1,11 +1,14 @@
 package com.example.aplicacionsencillaprueba;
 
 import android.Manifest;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,20 +22,15 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
 import java.util.ArrayList;
 import java.util.List;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import android.content.Intent;
-
 
 public class MainActivity extends AppCompatActivity {
 
-    private ArrayList<Contacts> contactsArrayList = new ArrayList<>();
+    private final ArrayList<Contacts> contactsArrayList = new ArrayList<>();
     private RecyclerView contactRV;
     private Adapter adapter;
     private final ActivityResultLauncher<Intent> createContactLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == RESULT_OK) {
-                    contactsArrayList.clear();
                     getContacts();   // refresca lista después de crear un contacto
                 }
             });
@@ -50,10 +48,7 @@ public class MainActivity extends AppCompatActivity {
             createContactLauncher.launch(intent);
         });
 
-
-
-        ArrayList<Adapter.Contacts> contactsList = new ArrayList<>();
-        adapter = new Adapter(this, contactsList);
+        adapter = new Adapter(this, contactsArrayList);
         contactRV.setLayoutManager(new LinearLayoutManager(this));
         contactRV.setAdapter(adapter);
 
@@ -99,6 +94,6 @@ public class MainActivity extends AppCompatActivity {
             cursor.close();
         }
 
-        adapter.notifyItemRangeChanged(0, contactsArrayList.size());
+        adapter.notifyDataSetChanged();
     }
 }

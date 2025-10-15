@@ -1,75 +1,58 @@
 package com.example.aplicacionsencillaprueba;
 
-import android.content.ContentUris;
 import android.content.ContentValues;
-import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 public class CreateNewContactActivity extends AppCompatActivity {
-
-    private EditText etName, etPhone;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_new_contact);
 
-        etName  = findViewById(R.id.etName);
-        etPhone = findViewById(R.id.etPhone);
-        Button btnSave = findViewById(R.id.btnSave);
+        EditText nameEditText = findViewById(R.id.nameEditText);
+        EditText phoneEditText = findViewById(R.id.phoneEditText);
+        Button saveButton = findViewById(R.id.saveButton);
 
-        btnSave.setOnClickListener(v -> saveContact());
+        saveButton.setOnClickListener(v -> {
+            String name = nameEditText.getText().toString();
+            String phone = phoneEditText.getText().toString();
+
+            if (!name.isEmpty() && !phone.isEmpty()) {
+                saveContact(name, phone);
+            }
+        });
     }
 
-    private void saveContact() {
-        String name  = etName.getText().toString().trim();
-        String phone = etPhone.getText().toString().trim();
+    private void saveContact(String name, String phone) {
+        ContentValues values = new ContentValues();
+        values.put(ContactsContract.RawContacts.ACCOUNT_TYPE, (String) null);
+        values.put(ContactsContract.RawContacts.ACCOUNT_NAME, (String) null);
 
-        if (TextUtils.isEmpty(name)) {
-            etName.setError("Ingrese un nombre");
-            return;
-        }
-        if (TextUtils.isEmpty(phone)) {
-            etPhone.setError("Ingrese un teléfono");
-            return;
-        }
+        android.net.Uri rawContactUri = getContentResolver().insert(ContactsContract.RawContacts.CONTENT_URI, values);
+        long rawContactId = Long.parseLong(rawContactUri.getLastPathSegment());
 
-        try {
-            ContentValues values = new ContentValues();
-            Uri rawContactUri = getContentResolver().insert(ContactsContract.RawContacts.CONTENT_URI, values);
-            if (rawContactUri == null) {
-                Toast.makeText(this, "No se pudo crear el contacto", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            long rawContactId = ContentUris.parseId(rawContactUri);
+        // Guardar el nombre
+        values.clear();
+        values.put(ContactsContract.Data.RAW_CONTACT_ID, rawContactId);
+        values.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE);
+        values.put(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name);
+        getContentResolver().insert(ContactsContract.Data.CONTENT_URI, values);
 
-            // Inserta nombre
-            values.clear();
-            values.put(ContactsContract.Data.RAW_CONTACT_ID, rawContactId);
-            values.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE);
-            values.put(ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME, name);
-            getContentResolver().insert(ContactsContract.Data.CONTENT_URI, values);
+        // Guardar el teléfono
+        values.clear();
+        values.put(ContactsContract.Data.RAW_CONTACT_ID, rawContactId);
+        values.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
+        values.put(ContactsContract.CommonDataKinds.Phone.NUMBER, phone);
+        values.put(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE);
+        getContentResolver().insert(ContactsContract.Data.CONTENT_URI, values);
 
-            // Inserta teléfono
-            values.clear();
-            values.put(ContactsContract.Data.RAW_CONTACT_ID, rawContactId);
-            values.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
-            values.put(ContactsContract.CommonDataKinds.Phone.NUMBER, phone);
-            values.put(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE);
-            getContentResolver().insert(ContactsContract.Data.CONTENT_URI, values);
-
-            Toast.makeText(this, "Contacto guardado", Toast.LENGTH_SHORT).show();
-            setResult(RESULT_OK);
-            finish();
-        } catch (Exception e) {
-            Toast.makeText(this, "Error al guardar: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        }
+        // Indicar que se ha creado el contacto y volver a la pantalla principal
+        setResult(RESULT_OK);
+        finish();
     }
 }
