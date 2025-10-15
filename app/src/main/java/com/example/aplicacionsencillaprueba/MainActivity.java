@@ -52,7 +52,8 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        adapter = new Adapter(this, contactsArrayList);
+        ArrayList<Adapter.Contacts> contactsList = new ArrayList<>();
+        adapter = new Adapter(this, contactsList);
         contactRV.setLayoutManager(new LinearLayoutManager(this));
         contactRV.setAdapter(adapter);
 

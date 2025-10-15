@@ -27,6 +27,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AplicacionSencillaPrueba">
 
+        <!-- Pantalla de creación de contactos (Ana) -->
+        <activity android:name=".CreateNewContactActivity" />
+
+        <!-- Pantalla de detalle de contacto (Sofía) -->
+        <activity android:name=".ContactDetailActivity" android:exported="false" />
+
+        <!-- Pantalla principal (Ruth) -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -35,7 +42,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".CreateNewContactActivity"/>
 
     </application>
 
